@@ -80,7 +80,7 @@ async function run() {
             res.send(result)
         })
 
-        app.post('/users', verifyToken, verifyAdmin, async (req, res) => {
+        app.post('/users', async (req, res) => {
             const user = req.body
             // insert user if email is unique..
             const query = { email: user.email }
@@ -131,6 +131,12 @@ async function run() {
         app.get('/menu', async (req, res) => {
             const cursor = menuCollection.find()
             const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.post('/menu', verifyToken, verifyAdmin, async (req, res) => {
+            const item = req.body;
+            const result = await menuCollection.insertOne(item)
             res.send(result)
         })
 
