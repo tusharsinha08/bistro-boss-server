@@ -17,6 +17,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.n7fvplr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.n7fvplr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
+
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -26,20 +28,21 @@ const client = new MongoClient(uri, {
     }
 });
 
+
 async function run() {
 
-
     try {
+
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+
+
         const database = client.db('bistro_boss_db')
         const userCollection = database.collection('users')
         const menuCollection = database.collection('menu')
         const reviewCollection = database.collection('reviews')
         const cartCollection = database.collection('carts')
         const paymentCollection = database.collection('payments')
-
-
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
 
         // middlewares 
         const verifyToken = (req, res, next) => {
@@ -231,6 +234,17 @@ async function run() {
 
             res.send({ paymentResult, deleteResult })
         })
+
+
+        app.get('/payments/:email', verifyToken, async (req, res) => {
+            const query = { email: req.params.email }
+            if (req.params.email !== req.decoded.email) {
+                return res.status(403).send({ message: "forbidden access" })
+            }
+            const result = await paymentCollection.find(query).toArray()
+            res.send(result)
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
