@@ -247,7 +247,7 @@ async function run() {
 
 
         // admin stats api-------
-        app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/admin-stats', async (req, res) => {
             const users = await userCollection.estimatedDocumentCount()
             const menuItems = await menuCollection.estimatedDocumentCount()
             const orders = await paymentCollection.estimatedDocumentCount()
@@ -266,10 +266,46 @@ async function run() {
                 users,
                 menuItems,
                 orders,
-                revenue,
+                revenue
             })
         })
 
+        // using aggregate pipeline-------
+        app.get('/order-stats', async (req, res) => {
+            const result = await paymentCollection.aggregate([
+                {
+                    $unwind: '$menuIds'
+                },
+                {
+                    $lookup: {
+                        from: 'menu',
+                        localField: 'menuIds',
+                        foreignField: '_id',
+                        as: 'menuItem'
+                    }
+                },
+                {
+                    $unwind: '$menuItem'
+                },
+                {
+                    $group: {
+                        _id: '$menuItem.category',
+                        quantity: { $sum: 1 },
+                        revenue: { $sum: '$menuItem.price'}
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        category: '$_id',
+                        quantity: '$quantity',
+                        revenue: '$revenue'
+                    }
+                }
+            ]).toArray()
+
+            res.send(result)
+        })
 
 
         // Send a ping to confirm a successful connection
