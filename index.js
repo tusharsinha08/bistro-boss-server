@@ -34,7 +34,7 @@ async function run() {
     try {
 
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
 
         const database = client.db('bistro_boss_db')
@@ -46,7 +46,7 @@ async function run() {
 
         // middlewares 
         const verifyToken = (req, res, next) => {
-            console.log(('inside the verify token'), req.headers.authorization);
+            // console.log(('inside the verify token'), req.headers.authorization);
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'unauthorized access' })
             }
@@ -309,8 +309,8 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
